@@ -1,5 +1,9 @@
 # Sloth Verifiable Delay Function
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/doublesharp/sloth-vdf/main/sloth.svg" height="20"/>
+</p>
+
 This module implements the Sloth VDF algorithm in JavaScript, TypeScript, and Soldity 0.8 for generating provable random numbers.
 
 ## Install
