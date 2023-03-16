@@ -2,6 +2,7 @@
   "name": "@0xdoublesharp/sloth-vdf",
   "version": "0.0.1",
   "description": "Sloth Verifiable Delay Function for Javascript and Solidity 0.8",
+  "repository": "https://github.com/doublesharp/sloth-vdf",
   "scripts": {
     "build": "tsc && npx hardhat export-abi",
     "compile": "npx hardhat compile",
