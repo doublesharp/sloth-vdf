@@ -1,0 +1,4 @@
+[abi-typegen]
+out = "sdk"
+target = "viem"
+contracts = ["RandomVDFv1"]

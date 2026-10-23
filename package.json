@@ -1,12 +1,21 @@
 {
   "name": "@0xdoublesharp/sloth-vdf",
   "version": "0.0.2",
-  "description": "Sloth Verifiable Delay Function for Javascript and Solidity 0.8",
+  "description": "Sloth sequential delay evaluation and verification for TypeScript and Solidity",
   "repository": "https://github.com/doublesharp/sloth-vdf",
   "scripts": {
-    "build": "tsc && npx hardhat export-abi",
-    "compile": "npx hardhat compile",
-    "prepare": "npm run build"
+    "build": "node scripts/tasks.mjs build",
+    "compile": "node scripts/tasks.mjs compile",
+    "typegen": "node scripts/tasks.mjs typegen",
+    "typecheck": "node scripts/tasks.mjs typecheck",
+    "test": "node scripts/tasks.mjs test",
+    "test:typescript": "node scripts/tasks.mjs typescript",
+    "test:solidity": "node scripts/tasks.mjs solidity",
+    "test:fuzz": "node scripts/tasks.mjs fuzz",
+    "test:invariant": "node scripts/tasks.mjs invariant",
+    "coverage": "node scripts/tasks.mjs coverage",
+    "benchmark": "node scripts/tasks.mjs benchmark",
+    "pack": "node scripts/tasks.mjs pack"
   },
   "keywords": [
     "solidity",
@@ -25,42 +34,41 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "devDependencies": {
-    "@0xdoublesharp/unsafe-math": "^0.0.12",
-    "@nomicfoundation/hardhat-chai-matchers": "^1.0.6",
-    "@nomicfoundation/hardhat-network-helpers": "^1.0.8",
-    "@nomiclabs/hardhat-ethers": "2.2.2",
-    "@nomiclabs/hardhat-etherscan": "3.1.7",
-    "@nomiclabs/hardhat-solhint": "^3.0.0",
-    "@typechain/ethers-v5": "^10.2.0",
-    "@typechain/hardhat": "^6.1.5",
-    "@types/chai": "^4.3.4",
-    "@types/mocha": "^10.0.1",
-    "@types/node": "^18.15.6",
-    "@typescript-eslint/eslint-plugin": "^5.56.0",
-    "@typescript-eslint/parser": "^5.56.0",
-    "chai": "4.3.7",
-    "dotenv": "16.0.3",
-    "eslint": "8.36.0",
-    "eslint-config-prettier": "8.8.0",
-    "hardhat": "^2.13.0",
-    "hardhat-abi-exporter": "^2.10.1",
-    "hardhat-contract-sizer": "^2.8.0",
-    "hardhat-deploy": "^0.11.25",
-    "hardhat-deploy-ethers": "^0.3.0-beta.13",
-    "hardhat-gas-reporter": "^1.0.9",
-    "hardhat-spdx-license-identifier": "^2.1.0",
-    "hardhat-storage-layout": "^0.1.7",
-    "hardhat-tracer": "^2.1.2",
-    "hardhat-watcher": "^2.5.0",
-    "prettier": "2.8.6",
-    "prettier-plugin-solidity": "1.1.3",
-    "solhint": "3.4.1",
-    "solhint-plugin-prettier": "^0.0.5",
-    "solidity-coverage": "0.8.2",
-    "ts-generator": "^0.1.1",
-    "ts-node": "~10.9.1",
-    "tslint": "~6.1.3",
-    "typechain": "^8.1.1",
-    "typescript": "5.0.2"
+    "@0xdoublesharp/abi-typegen": "0.8.0",
+    "@types/node": "24.10.0",
+    "@vitest/coverage-v8": "5.0.5",
+    "fast-check": "4.10.2",
+    "forge-std": "https://codeload.github.com/foundry-rs/forge-std/tar.gz/refs/tags/v1.16.2",
+    "typescript": "5.9.3",
+    "viem": "2.57.10",
+    "vitest": "5.0.5"
+  },
+  "packageManager": "pnpm@11.21.0",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "files": [
+    "dist",
+    "contracts",
+    "sloth.svg"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./contracts": {
+      "types": "./dist/contracts/index.d.ts",
+      "default": "./dist/contracts/index.js"
+    },
+    "./contracts/*": "./contracts/*"
+  },
+  "peerDependencies": {
+    "viem": "^2.0.0"
+  },
+  "peerDependenciesMeta": {
+    "viem": {
+      "optional": true
+    }
   }
 }

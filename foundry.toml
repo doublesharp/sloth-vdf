@@ -1,0 +1,36 @@
+[profile.default]
+src = "contracts"
+test = "test/solidity"
+libs = ["node_modules"]
+remappings = ["forge-std/=node_modules/forge-std/src/"]
+solc_version = "0.8.19"
+evm_version = "paris"
+optimizer = true
+optimizer_runs = 999999
+# pnpm scripts override these with a separate directory for each checkout.
+out = "/Volumes/Scratch/sloth-vdf/build/default/out"
+cache_path = "/Volumes/Scratch/sloth-vdf/build/default/cache"
+test_failures_file = "/Volumes/Scratch/sloth-vdf/build/default/cache/test-failures"
+gas_snapshot_emit = false
+
+[profile.default.fuzz]
+runs = 512
+failure_persist_dir = "/Volumes/Scratch/sloth-vdf/build/default/cache/fuzz"
+
+[profile.default.invariant]
+runs = 128
+depth = 64
+fail_on_revert = true
+show_metrics = true
+failure_persist_dir = "/Volumes/Scratch/sloth-vdf/build/default/cache/invariant"
+
+[profile.deep.fuzz]
+runs = 4096
+
+[profile.deep.invariant]
+runs = 512
+depth = 128
+
+[fmt]
+line_length = 120
+quote_style = "single"

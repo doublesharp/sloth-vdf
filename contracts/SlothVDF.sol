@@ -3,12 +3,9 @@
 
 pragma solidity ^0.8.0;
 
-// TODO: checking for quadratic residues has been removed, unclear of implications
-
-import {UnsafeMath} from '@0xdoublesharp/unsafe-math/contracts/UnsafeMath.sol';
-
 library SlothVDF {
-    using UnsafeMath for uint256;
+    error InvalidParameters();
+    error InvalidSeed();
 
     struct SlothParams {
         // randomized minting
@@ -26,21 +23,39 @@ library SlothVDF {
     /// @param _seed seed
     /// @param _prime prime
     /// @param _iterations number of iterations
-    /// @return true if y is a quadratic residue modulo p
+    /// @dev The caller must supply a trusted prime congruent to 3 modulo 4.
+    /// @return true if the canonical proof reverses to the seed
     function verify(uint256 _proof, uint256 _seed, uint256 _prime, uint256 _iterations) internal pure returns (bool) {
+        if (_prime <= 3 || _prime % 4 != 3 || _iterations == 0) return false;
+        _seed %= _prime;
+        if (_seed == 0 || _proof == 0 || _proof >= _prime) return false;
+
+        uint256 mask = permutationMask(_prime);
         uint256 _i = _iterations;
         while (_i != 0) {
-            _i = _i.dec();
-            _proof = mulmod(_proof, _proof, _prime);
+            --_i;
+            uint256 squared = mulmod(_proof, _proof, _prime);
+            // Odd roots encode a nonresidue input; even roots encode a residue.
+            _proof = (_proof & 1) == 0 ? squared : _prime - squared;
+            _proof = permute(_proof, mask, _prime);
         }
 
-        _seed %= _prime;
+        return _seed == _proof;
+    }
 
-        if (_seed == _proof) return true;
+    /// @dev Flip the lower half of the field's bits, as in the Sloth reference implementation.
+    function permutationMask(uint256 _prime) private pure returns (uint256) {
+        uint256 bits = 0;
+        for (uint256 value = _prime; value != 0; value >>= 1) {
+            ++bits;
+        }
+        return (uint256(1) << (bits / 2)) - 1;
+    }
 
-        if (_prime - _seed == _proof) return true;
-
-        return false;
+    /// @dev Cycle-walk XOR on [1, p - 1]. This permutation is its own inverse.
+    function permute(uint256 value, uint256 mask, uint256 _prime) private pure returns (uint256) {
+        uint256 flipped = value ^ mask;
+        return flipped == 0 || flipped >= _prime ? value : flipped;
     }
 
     /// @dev pow(base, exponent, modulus)
@@ -65,11 +80,20 @@ library SlothVDF {
     /// @param _iterations number of iterations
     /// @return sloth result
     function compute(uint256 _seed, uint256 _prime, uint256 _iterations) internal pure returns (uint256) {
-        uint256 e = _prime.inc() >> 2;
+        if (_prime <= 3 || _prime % 4 != 3 || _iterations == 0) revert InvalidParameters();
+        // Equivalent to (p + 1) / 4 without overflowing uint256.
+        uint256 e = (_prime >> 2) + 1;
         _seed %= _prime;
+        if (_seed == 0) revert InvalidSeed();
+        uint256 mask = permutationMask(_prime);
 
-        for (uint256 _i = _iterations; _i != 0; _i = _i.dec()) {
-            _seed = bexmod(_seed, e, _prime);
+        for (uint256 _i = _iterations; _i != 0; --_i) {
+            uint256 input = permute(_seed, mask, _prime);
+            uint256 root = bexmod(input, e, _prime);
+            bool residue = mulmod(root, root, _prime) == input;
+            // Choose the even root for residues and the odd root for nonresidues.
+            if (((root & 1) == 0) != residue) root = _prime - root;
+            _seed = root;
         }
 
         return _seed;

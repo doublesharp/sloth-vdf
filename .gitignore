@@ -14,3 +14,9 @@ typechain
 
 /dist
 /sdk
+/out
+/broadcast
+*.lcov
+*.tgz
+*.log
+.solidity-auditor/

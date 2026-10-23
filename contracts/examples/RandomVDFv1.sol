@@ -4,34 +4,57 @@ pragma solidity ^0.8.19;
 import {SlothVDF} from '../SlothVDF.sol';
 
 contract RandomVDFv1 {
-    // large prime
-    uint256 public prime = 432211379112113246928842014508850435796007;
-    // adjust for block finality
-    uint256 public iterations = 1000;
-    // increment nonce to increase entropy
-    uint256 private nonce;
+    // Largest 256-bit prime, congruent to 3 modulo 4.
+    uint256 public constant prime = 2 ** 256 - 189;
+    // Calibrate against fast solvers, then check verification gas on the target chain.
+    uint256 public immutable iterations;
     // address -> vdf seed
     mapping(address => uint256) public seeds;
+    // The future block that supplies entropy after the request is committed.
+    mapping(address => uint256) public seedBlocks;
 
     uint256 public proof;
+    bool public proven;
 
     error InvalidProof();
     error AlreadyProven();
+    error SeedAlreadyCreated();
+    error SeedNotReady();
+    error SeedExpired();
+    error InvalidIterations();
 
-    function createSeed() external payable {
-        // commit funds/tokens/etc here
-        // create a pseudo random seed as the input
-        uint256 _nonce = nonce++;
-        seeds[msg.sender] = uint256(
-            keccak256(abi.encodePacked(msg.sender, _nonce, block.timestamp, blockhash(block.number - 1)))
-        );
+    constructor(uint256 _iterations) {
+        if (_iterations == 0) revert InvalidIterations();
+        iterations = _iterations;
+    }
+
+    function createSeed() external {
+        if (proven) revert AlreadyProven();
+        uint256 target = seedBlocks[msg.sender];
+        if (target != 0 && (seeds[msg.sender] != 0 || block.number <= target + 256)) revert SeedAlreadyCreated();
+        // Bind any application-specific wager or choice here, before the entropy exists.
+        seedBlocks[msg.sender] = block.number + 1;
+    }
+
+    function finalizeSeed() external {
+        if (proven) revert AlreadyProven();
+        uint256 target = seedBlocks[msg.sender];
+        if (target == 0 || block.number <= target) revert SeedNotReady();
+        if (block.number > target + 256) revert SeedExpired();
+        if (seeds[msg.sender] != 0) revert SeedAlreadyCreated();
+        bytes32 entropy = blockhash(target);
+        if (entropy == bytes32(0)) revert SeedNotReady();
+        seeds[msg.sender] = 1
+            + (uint256(keccak256(abi.encode(address(this), block.chainid, msg.sender, target, entropy))) % (prime - 1));
     }
 
     function prove(uint256 _proof) external {
-        if (proof != 0) revert AlreadyProven();
+        if (proven) revert AlreadyProven();
+        if (seeds[msg.sender] == 0) revert SeedNotReady();
         if (!SlothVDF.verify(_proof, seeds[msg.sender], prime, iterations)) revert InvalidProof();
 
         // use the proof as a provable random number
         proof = _proof;
+        proven = true;
     }
 }
