@@ -147,6 +147,18 @@ Coverage commands fail if production TypeScript statements, lines, functions, or
 
 Use `pnpm run pack` to create a publishable tarball under Scratch. It stages real build files, so the package does not depend on checkout symlinks.
 
+## Publishing
+
+The [publish workflow](.github/workflows/publish.yml) uses the npm trusted publisher configured for `doublesharp/sloth-vdf` and `publish.yml`. It publishes with GitHub OIDC and provenance; no npm token is needed.
+
+1. Bump `package.json` to a new version, commit it, and push it to GitHub.
+2. Create and push a matching tag, such as `v0.0.3` for version `0.0.3`.
+3. Publish a GitHub release for that tag. The workflow tests the code, checks coverage, builds the tarball, and publishes it to npm.
+
+Stable releases use npm's `latest` tag. Versions with a prerelease suffix, or releases marked as prereleases on GitHub, use `next`. The workflow rejects release tags that do not match the package version.
+
+To validate the workflow without publishing, open **Actions → Publish to npm → Run workflow** and leave **dry_run** enabled. Dry runs use a temporary prerelease version in the Scratch tarball, so npm can validate an already-published source version. A manual run with `dry_run` disabled must select a matching version tag. The workflow does not change the repository's version or create releases automatically.
+
 ## Security model
 
 A valid proof establishes the correct result for the seed and iteration count. It does **not** establish the exact moment a participant learned that result.
