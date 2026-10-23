@@ -142,6 +142,7 @@ switch (task) {
     cpSync(join(build, 'dist'), join(staging, 'dist'), { recursive: true });
     cpSync(join(root, 'contracts'), join(staging, 'contracts'), { recursive: true });
     cpSync(join(root, 'README.md'), join(staging, 'README.md'));
+    cpSync(join(root, 'CHANGELOG.md'), join(staging, 'CHANGELOG.md'));
     cpSync(join(root, 'sloth.svg'), join(staging, 'sloth.svg'));
     run('pnpm', ['pack', '--pack-destination', join(build, 'packages')], staging);
     break;

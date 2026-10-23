@@ -15,9 +15,19 @@
 
 Sloth VDF pairs an off-chain TypeScript evaluator with an inexpensive Solidity verifier. It is intended for EVM applications that lock a decision before a result can be computed, including applications on fast chains such as Sonic and HyperEVM.
 
-**Status:** this checkout contains a breaking repair to the Sloth rounds. Proofs from the published `0.0.2` release and earlier are incompatible. Use this checkout until an updated package is released.
+**Version 0.0.3 repairs the Sloth rounds.** Proofs from `0.0.2` and earlier are incompatible. Upgrade the evaluator and Solidity verifier together, and recompute proofs with the repaired implementation. See the [release notes](CHANGELOG.md).
 
 ## Quick start
+
+### Install the package
+
+```sh
+pnpm add @0xdoublesharp/sloth-vdf@0.0.3
+```
+
+The package includes the TypeScript evaluator, Solidity sources, and generated viem bindings. Install `viem` if you use the generated bindings. Consumers do not need Foundry or a Scratch volume to use the published package.
+
+### Develop from source
 
 You need **Node.js 22.12+**, **pnpm 11.21**, [Foundry](https://getfoundry.sh/introduction/installation/) with `forge` and `anvil` on your PATH, and a mounted `/Volumes/Scratch`.
 
